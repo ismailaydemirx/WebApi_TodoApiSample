@@ -47,18 +47,39 @@ namespace WebApi_TodoApiSample.Controllers
         }
 
         [HttpGet("list")]
-        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(List<Todo>))] // ProduceResponseType OK durumunda bize typeof Todo'yu list olarak döndürecek.
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(List<TodoResponse>))] // ProduceResponseType OK durumunda bize typeof Todo'yu list olarak döndürecek.
         public IActionResult List()
         {
-            return Ok(_db.Todos.ToList());
+            //List<Todo> todos = _db.Todos.ToList();
+            //List<TodoResponse> result = new List<TodoResponse>();
+
+            //foreach (Todo todo in todos)
+            //{
+            //    result.Add(new TodoResponse
+            //    {
+            //        Id = todo.Id,
+            //        Text = todo.Text,
+            //        Description = todo.Description,
+            //        IsCompleted = todo.IsCompleted,
+            //    });
+            //}
+
+            List<TodoResponse> result = _db.Todos.Select(x => new TodoResponse
+                {
+                    Id = x.Id,
+                    Text = x.Text,
+                    Description = x.Description,
+                }).ToList();
+
+            return Ok(result);
         }
 
         [HttpPost("create")]
         [ProducesResponseType((int)HttpStatusCode.Created, Type = typeof(TodoResponse))]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(TodoResponse))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
         public IActionResult Create([FromBody] TodoCreateModel model)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 //try
                 //{
@@ -99,6 +120,79 @@ namespace WebApi_TodoApiSample.Controllers
 
 
 
+        }
+
+        // Bir kayıdın değişebilecek tüm alanlarını değiştirebilecek bir işlem yapıyorsak Put işlemini kullanmalıyız.
+
+        [HttpPut("edit/{id}")]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(TodoResponse))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(string))]
+        public IActionResult Update([FromRoute] int id, [FromBody] TodoUpdateModel model)
+        {
+            Todo todo = _db.Todos.Find(id);
+
+            if (todo == null)
+                return NotFound("Kayıt bulunamadı.");
+
+            todo.Text = model.Text;
+            todo.Description = model.Description;
+            todo.Description2 = model.Description2;
+            todo.IsCompleted = model.IsCompleted;
+
+            int affected = _db.SaveChanges();
+
+            if (affected > 0)
+            {
+                TodoResponse result = new TodoResponse
+                {
+                    Id = todo.Id,
+                    Text = todo.Text,
+                    Description = todo.Description,
+                    IsCompleted = todo.IsCompleted,
+                };
+
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest("Güncelleme yapılamadı.");
+            }
+        }
+
+        // Patch istekleri 1 değişkeni güncellemek için kullanılır. Put da yapabiliriz ama Patch bunun için mevcut zaten.
+
+        [HttpPatch("changestate/{id}/{iscompleted}")]
+        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(TodoResponse))]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(string))]
+        public IActionResult ChangeState([FromRoute] int id, [FromRoute] bool iscompleted)
+        {
+            Todo todo = _db.Todos.Find(id);
+
+            if (todo == null)
+                return NotFound("Kayıt bulunamadı.");
+
+            todo.IsCompleted = iscompleted;
+
+            int affected = _db.SaveChanges();
+
+            if (affected > 0)
+            {
+                TodoResponse result = new TodoResponse
+                {
+                    Id = todo.Id,
+                    Text = todo.Text,
+                    Description = todo.Description,
+                    IsCompleted = todo.IsCompleted,
+                };
+
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest("Durum değiştirildi   .");
+            }
         }
     }
 }

@@ -35,4 +35,19 @@ namespace WebApi_TodoApiSample.Models
 
     }
 
+
+    public class TodoUpdateModel
+    {
+        [Required]
+        [StringLength(250)]
+        public string Text { get; set; }
+
+        [StringLength(500)]
+        public string Description { get; set; }
+
+        [StringLength(50)]
+        public string Description2 { get; set; }
+        public bool IsCompleted { get; set; }
+
+    }
 }
