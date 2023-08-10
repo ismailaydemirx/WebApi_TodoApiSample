@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +28,12 @@ namespace WebApi_TodoApiSample
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // ModelStateInvalidFilter Validation'unu kapatıyoruz.
+            //services.Configure<ApiBehaviorOptions>(opts =>
+            //{
+            //    opts.SuppressModelStateInvalidFilter = true;
+            //});
+
             // DbContextOptions
             services.AddDbContext<DatabaseContext>(opts =>
             {

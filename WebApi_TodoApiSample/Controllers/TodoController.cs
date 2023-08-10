@@ -58,8 +58,10 @@ namespace WebApi_TodoApiSample.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(TodoResponse))]
         public IActionResult Create([FromBody] TodoCreateModel model)
         {
-            try
+            if(ModelState.IsValid)
             {
+                //try
+                //{
                 Todo todo = new Todo
                 {
                     Text = model.Text,
@@ -85,12 +87,15 @@ namespace WebApi_TodoApiSample.Controllers
                 {
                     return BadRequest("Kayıt alınamadı");
                 }
-            }
-            catch (Exception ex)
-            {
+                //}
+                //catch (Exception ex)
+                //{
 
-                return BadRequest(ex.Message);
+                //    return BadRequest(ex.Message);
+                //}
             }
+
+            return BadRequest(ModelState);
 
 
 
