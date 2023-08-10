@@ -65,11 +65,11 @@ namespace WebApi_TodoApiSample.Controllers
             //}
 
             List<TodoResponse> result = _db.Todos.Select(x => new TodoResponse
-                {
-                    Id = x.Id,
-                    Text = x.Text,
-                    Description = x.Description,
-                }).ToList();
+            {
+                Id = x.Id,
+                Text = x.Text,
+                Description = x.Description,
+            }).ToList();
 
             return Ok(result);
         }
@@ -191,7 +191,57 @@ namespace WebApi_TodoApiSample.Controllers
             }
             else
             {
-                return BadRequest("Durum değiştirildi   .");
+                return BadRequest("Durum değiştirildi.");
+            }
+        }
+
+        [HttpDelete("delete/{id}")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
+        [ProducesResponseType((int)HttpStatusCode.NotFound, Type = typeof(string))]
+        public IActionResult Delete([FromRoute] int id)
+        {
+            Todo todo = _db.Todos.Find(id);
+
+            if (todo == null)
+            {
+                return NotFound("Kayıt bulunamadı");
+            }
+            else
+            {
+                _db.Todos.Remove(todo);
+                int affected = _db.SaveChanges();
+
+                if (affected > 0)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest("Kayıt silinemedi.");
+                }
+            }
+        }
+
+        [HttpDelete("remove-all/{id}")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest, Type = typeof(string))]
+        public IActionResult DeleteAll()
+        {
+            List<Todo> todos = _db.Todos.ToList();
+            foreach (Todo todo in todos)
+            {
+                _db.Todos.Remove(todo);
+            }
+            int affected = _db.SaveChanges();
+
+            if (affected > 0)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest("Kayıt yok ya da kayıt silinemedi.");
             }
         }
     }
